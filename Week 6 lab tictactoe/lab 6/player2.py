@@ -6,7 +6,8 @@ from gameboard import BoardClass
 #print("Desktop Name: " +socket.gethostname())
 
 def flush_input():
-    '''from rosettacode to clear input buffer '''
+    '''copied from rosettacode.com to clear input buffer
+        exception if the import doesn't work, try another way ig '''
     try:
         import msvcrt
         while msvcrt.kbhit():
@@ -15,11 +16,11 @@ def flush_input():
         import sys, termios    #for linux/unix
         termios.tcflush(sys.stdin, termios.TCIOFLUSH)
 
-def go(game: BoardClass):
+def play_again(game: BoardClass, sockets: socket):
     '''receives if play again
         returns bool whether to play again or not
 
-        param: game of boardclass 
+        arg, game:boardclass, sockets: socket
         
         ex: go(game)
         '''
@@ -29,10 +30,10 @@ def go(game: BoardClass):
         return True
     return False
 
-def receive(game: BoardClass):
+def receive(game: BoardClass, sockets:socket):
     '''recieves other player move, updates and prints board
 
-    params: game of type boardclass
+    args game:boardclass, socket:socket
 
     ex:
     receive() 
@@ -45,10 +46,10 @@ def receive(game: BoardClass):
     game.updateGameBoard(opp_move, 'x')
     game.printBoard()
 
-def getmove(game: BoardClass):
+def getmove(game: BoardClass, sockets:socket):
     '''gets move and prints updated board
     
-        parameter: game of boardclass class
+        args: game:boardclass, sockets:socket
 
         ex:
         getmove()
@@ -78,10 +79,10 @@ def getmove(game: BoardClass):
     game.printBoard()
     
 
-def run(game: BoardClass, otheruser):
+def run(game: BoardClass, otheruser:str, sockets:socket):
     ''' gets user move, checks for end game, recieves p2 move, checks for end game
 
-        param is game of baordclass class
+        args: game:boardclass, otheruser: string, sockets:sockets
     
         ex:
         run()
@@ -90,7 +91,7 @@ def run(game: BoardClass, otheruser):
     game.updateGamesPlayed()
     game.setLastUser(otheruser)
     while not game.boardIsFull() or not game.isWinner():
-        receive(game)
+        receive(game, sockets)
         game.setLastUser(otheruser)
         if game.isWinner():
             print("x WINS")
@@ -100,7 +101,7 @@ def run(game: BoardClass, otheruser):
             game.addtie()
             print("NOBODY WINS")
             break
-        getmove(game)
+        getmove(game, sockets)
         game.setLastUser('player2')
         if game.isWinner():
             print("O WINS")
@@ -116,7 +117,7 @@ def run(game: BoardClass, otheruser):
 def connect():
     ''' connect sto other player
     no params,
-    no returns
+    returns tuple of address and port
 
     ex:
         connect()
@@ -132,32 +133,35 @@ def connect():
     port = int(input("port"))
     return (serverAddress, port)
 
-#create a socket obj
-j = True
-while j:
-    try:
-        serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #bind my host with my port number
-        serverSocket.bind(connect())
-        j = False
-    except:
-        print('didnt work')
 
-#setup socket using listen
-# 5 means max num connections socket allows
-serverSocket.listen(0)
-#begin accepting incoming connection requrests
-sockets, clientAddress = serverSocket.accept()
-#printing the client address
-otheruser= sockets.recv(1024).decode()
-sockets.send('player2'.encode())
-game = BoardClass('player2', otheruser)
-run(game, otheruser)
-while go(game):
-    run(game, otheruser)
-    
-game.printStats()
-serverSocket.close()
+if __name__ == "__main__":
+    #create a socket obj
+    not_connected = True
+    while not_connected:
+        try:
+            serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            #bind my host with my port number
+            serverSocket.bind(connect())
+            not_connected = False
+        except:
+            print('didnt work')
+        
+
+    #setup socket using listen
+    # 5 means max num connections socket allows
+    serverSocket.listen(0)
+    #begin accepting incoming connection requrests
+    sockets, clientAddress = serverSocket.accept()
+    #printing the client address
+    otheruser= sockets.recv(1024).decode()
+
+    sockets.send('player2'.encode())
+    game = BoardClass('player2', otheruser)
+    run(game, otheruser, sockets)
+    while play_again(game, sockets):
+        run(game, otheruser, sockets)
+    game.printStats()
+    serverSocket.close()
 
 
 

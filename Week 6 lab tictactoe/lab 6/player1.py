@@ -21,7 +21,8 @@ receive: gets other player's move and plots it
 """
 #
 def flush_input():
-    '''from rosettacode to clear input buffer '''
+    '''from rosettacode.com to clear input buffer
+    I copied this from the website'''
     try:
         import msvcrt
         while msvcrt.kbhit():
@@ -32,6 +33,10 @@ def flush_input():
 
 
 class timeout:
+    '''time out class copied from stack overflow to solve connection 
+    taking too long
+    
+    has seconds and error message to hold time and tell what happens when it takes too long'''
     def __init__(self, seconds=1, error_message='Timeout'):
         self.seconds = seconds
         self.error_message = error_message
@@ -45,26 +50,32 @@ class timeout:
 
 
 #create a socket obj
-global sockets
-sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
 
 #attempt connect to server
 
 def connect():
     '''connects to the other
+
+    no args
+    returns nothing
+    exception if socket fails to connect or type of input wrong
+        just tries again
+
     ex:
         connect()
         [in termina] 
         ip address (enter)
         port (enter)
     
-        returns nothing
+        
         '''
+    sockets = None
     try_connect= 'y'
     while try_connect == 'y':
 
         try:
-            global sockets
+            
             sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             p2addy = input("p1 give p2 ip address")
             p2host = int(input("p1 give port"))
@@ -81,16 +92,20 @@ def connect():
                 try_connect = try_connect.lower()
             if try_connect == 'n':
                 exit(0)
+    return sockets
 
 
-def sendUser():
+def sendUser(sockets):
     '''asks for user and sends it to other person
         
+        args: sockets
+
         senduser()
         [in termina]
         USERNAME (enter)
         
     no return
+    no exceptions
     '''
     user = input('Username')
     sockets.send(user.encode())
@@ -99,10 +114,10 @@ def sendUser():
     #creates board with p1
     
 
-def getMove(game: BoardClass):
+def getMove(game: BoardClass, sockets:socket):
     '''gets move and prints updated board
     
-        parameter: game of boardclass class
+        arg: game:boardclass, sockets:socket
 
         ex:
         getmove()
@@ -110,7 +125,7 @@ def getMove(game: BoardClass):
         3
         
         returns nothing
-        
+        excepts for bad moves and asks for a new move
         '''
     flush_input()
     try:
@@ -133,15 +148,16 @@ def getMove(game: BoardClass):
     
 
 
-def receive(game: BoardClass):
+def receive(game: BoardClass, sockets:socket):
     '''recieves other player move, updates and prints board
 
-    params: game of type boardclass
+    params: game:boardclass, sockets:socket
 
     ex:
     receive() 
 
     no returns
+    no exceptions
 
     '''
     p2_move = int(sockets.recv(1024).decode())
@@ -149,20 +165,22 @@ def receive(game: BoardClass):
     game.printBoard()
 
 
-def run(game: BoardClass, user):
+def run(game: BoardClass, user:str, sockets:socket):
     ''' gets user move, checks for end game, recieves p2 move, checks for end game
 
-        param is game of baordclass class
+        args: game:boardclass, user:str, sockets:socket
     
         ex:
         run()
+
         no returns
+        no exceptions
     '''
     game.setLastUser(None)
     game.updateGamesPlayed()
 #nobody has won yet and board isn't full
     while not game.isWinner() or not game.boardIsFull():
-        getMove(game)
+        getMove(game, sockets)
         game.setLastUser(user)
         if game.isWinner():
             print("x WINS")
@@ -172,7 +190,7 @@ def run(game: BoardClass, user):
             print("NOBODY WINS")
             game.addtie()
             break
-        receive(game)
+        receive(game, sockets)
         game.setLastUser('player2')
 
         if game.isWinner():
@@ -186,27 +204,10 @@ def run(game: BoardClass, user):
     
 
 
-
-'''
-
-Player 1 will ask the user for their move using the built-in input() function
-and send it to player 2.
-Player 1 will always be x/X
-Player 1 will always send the first move to player 2
-Each move will correspond to the input given using the keyboard.
-Once player 1 sends their move they will wait for player 2's move.
-Repeat steps 3.1.2 - 3.1.4 until the game is over (A game is over when a winner is found or the board is full)
-Once a game as finished (win or tie) the user will indicate if they want to play again using the command line.
-If the user enters 'y' or 'Y' then player 1 will send "Play Again" to player 2
-If the user enters 'n' or 'N' then player 1 will send "Fun Times" to player 2 and end the program
-Once the user is done player they will print all the statistics.
-
-'''
-
-def go(game):
+def play_again(game, sockets):
     ''' asks if you wanna play again. 
 
-    params game of boardclass
+    args: game:boardclass, sockets:socket
 
     returns if you wanna play again
 
@@ -229,13 +230,15 @@ def go(game):
         sockets.send('Play Again'.encode())
         game.resetGameBoard()
         return True
-
-
-connect()
-user, p2_user = sendUser()
-game = BoardClass(user,p2_user)
-run(game,user)
-while go(game):
-    run(game,user)
-game.printStats()
-sockets.close()
+    
+if __name__ == '__main__':
+        
+    sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sockets = connect()
+    user, p2_user = sendUser(sockets)
+    game = BoardClass(user,p2_user)
+    run(game,user, sockets)
+    while play_again(game, sockets):
+        run(game,user, sockets)
+    game.printStats()
+    sockets.close()
