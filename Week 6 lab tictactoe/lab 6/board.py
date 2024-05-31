@@ -6,8 +6,9 @@ from tkinter import ttk
 
 #create class for user interface
 class Board():
+    
     #class variable in class scope
-    board = [0,0,0,0,0,0,0,0,0]
+    board = [0,0,0,0,0,0,0,0]
     button1 = 0
     button2 = 0
     button3 = 0
@@ -17,6 +18,8 @@ class Board():
     button7 = 0
     button8 = 0
     button9 = 0
+    X = 0
+    O = 0
 
     def __init__(self) -> None:
         #redefine it
@@ -34,17 +37,17 @@ class Board():
         # self.createResultLabel()
         # self.createSubmitButton()
         # self.createQuitButton()
+        self.updatePos()
         self.startUI()
 
 
     #method that initializes tk vars
     def initTk(self):
-        self.num1 = tk.IntVar()
-        self.num2 = tk.IntVar()
-        self.operation = tk.StringVar()
-        self.result = tk.IntVar()
+        self.X = tk.Text(self.master, font = 50)
+        self.X.insert('insert',"X")
+        self.O = tk.Text(self.master, font = 50)
+        self.O.insert('insert',"O")
         
-
 
 
         #init tkinter
@@ -56,7 +59,7 @@ class Board():
         self.master.configure(background = 'grey')
         self.master.resizable(0,0)
 
-    def creategrid(self):
+    def creategrid(self):                                   #make sure no parents for command so it waits
         self.button1 = tk.Button(self.master, text = 'y',command = None)
         self.button2 = tk.Button(self.master, text = 'fds',command = None)
         self.button3 = tk.Button(self.master, text = 'hs',command = None)
@@ -82,10 +85,23 @@ class Board():
         self.button7.grid(row = 2, column = 0,sticky='nsew')
         self.button8.grid(row = 2, column = 1,sticky='nsew')
         self.button9.grid(row = 2, column = 2,sticky='nsew')
+    
+    def updatePos(self):
+        #loop thru it and change things, change to text box x and o
+        for i in range(9):
+        
+            if self.board[i] == 'x':
+                self.X.grid(row = i//3, column= i%3)
+
+            if self.board[i] == 'o':
+                self.O.grid(row = i//3, column= i%3)
+                
+            
 
 
-    def createQuitButton(self):
-        self.quitButton = tk.Button(self.master, text= 'Quit',command = self.master.destroy).pack()
+
+    def updateBoard(self,board_arr):
+        self.board = board_arr
 
     def createMoves(self):
         for i,j in enumerate(self.board):
