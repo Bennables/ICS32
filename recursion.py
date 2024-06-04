@@ -24,3 +24,13 @@ def adddigits(num):
         return num%10 +adddigits(num//10)
 
 print(adddigits(1234))
+
+#reverse word using recursion
+
+def reverser(word):
+    if word == '':
+        return ''
+    else:
+        return word[-1] + reverser(word[:-1])
+    
+print(reverser('hello'))
