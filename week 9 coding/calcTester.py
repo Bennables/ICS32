@@ -12,11 +12,11 @@ class calcTester(unittest.TestCase):
 
     #providing code to setup test cases\
     def setUp(self):
-        print("Starting test case", self.testCaseNumber+ '.')
+        print("Starting test case", str(self.testCaseNumber)+ '.')
 
     #providing code to wrap up a test case
     def tearDown(self) -> None:
-        print("completed executing test case", self.testCaseNumber, '.\n')
+        print("completed executing test case", str(self.testCaseNumber), '.\n')
         calcTester.testCaseNumber = calcTester.testCaseNumber
 
     
@@ -26,6 +26,7 @@ class calcTester(unittest.TestCase):
         self.myCalc.addNumbers(1,1)
         self.assertEqual(self.myCalc.getResult(), 2)
         print("I am in test case ", calcTester.testCaseNumber)
+        self.assertEqual(self.myCalc.getResult(),1)
 
     def test_DivideByZero(self):
         with self.assertRaises(cc.DivideByZeroError):
@@ -33,4 +34,5 @@ class calcTester(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    #run the tests
     unittest.main()
