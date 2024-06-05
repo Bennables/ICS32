@@ -2,6 +2,7 @@ import socket
 from gameboard import BoardClass
 import time
 import signal
+import board
 
 
 
@@ -20,17 +21,6 @@ receive: gets other player's move and plots it
 
 """
 #
-def flush_input():
-    '''from rosettacode.com to clear input buffer
-    I copied this from the website'''
-    try:
-        import msvcrt
-        while msvcrt.kbhit():
-            msvcrt.getch()
-    except ImportError:
-        import sys, termios    #for linux/unix
-        termios.tcflush(sys.stdin, termios.TCIOFLUSH)
-
 
 class timeout:
     '''time out class copied from stack overflow to solve connection 
@@ -95,7 +85,7 @@ def connect():
     return sockets
 
 
-def sendUser(sockets):
+def sendUser(sockets:socket):
     '''asks for user and sends it to other person
         
         args: sockets
@@ -114,7 +104,7 @@ def sendUser(sockets):
     #creates board with p1
     
 
-def getMove(game: BoardClass, sockets:socket):
+def getMove(game: BoardClass, sockets:socket, gui:board):
     '''gets move and prints updated board
     
         arg: game:boardclass, sockets:socket
@@ -127,11 +117,7 @@ def getMove(game: BoardClass, sockets:socket):
         returns nothing
         excepts for bad moves and asks for a new move
         '''
-    flush_input()
-    try:
-        move = int(input('your move 1-9\n'))
-    except:
-        move = 10
+    
     #123
     #456
     #789
@@ -165,7 +151,7 @@ def receive(game: BoardClass, sockets:socket):
     game.printBoard()
 
 
-def run(game: BoardClass, user:str, sockets:socket):
+def run(game: BoardClass, user:str, sockets:socket, gui: board):
     ''' gets user move, checks for end game, recieves p2 move, checks for end game
 
         args: game:boardclass, user:str, sockets:socket
@@ -180,7 +166,7 @@ def run(game: BoardClass, user:str, sockets:socket):
     game.updateGamesPlayed()
 #nobody has won yet and board isn't full
     while not game.isWinner() or not game.boardIsFull():
-        getMove(game, sockets)
+        getMove(game, sockets, gui)
         game.setLastUser(user)
         if game.isWinner():
             print("x WINS")
@@ -232,12 +218,12 @@ def play_again(game, sockets):
         return True
     
 if __name__ == '__main__':
-        
+    gui = board('x')
     sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sockets = connect()
     user, p2_user = sendUser(sockets)
     game = BoardClass(user,p2_user)
-    run(game,user, sockets)
+    run(game,user, sockets, gui)
     while play_again(game, sockets):
         run(game,user, sockets)
     game.printStats()

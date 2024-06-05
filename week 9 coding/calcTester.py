@@ -17,7 +17,7 @@ class calcTester(unittest.TestCase):
     #providing code to wrap up a test case
     def tearDown(self) -> None:
         print("completed executing test case", str(self.testCaseNumber), '.\n')
-        calcTester.testCaseNumber = calcTester.testCaseNumber
+        calcTester.testCaseNumber += 1
 
     
     #TEST_ required
@@ -26,7 +26,7 @@ class calcTester(unittest.TestCase):
         self.myCalc.addNumbers(1,1)
         self.assertEqual(self.myCalc.getResult(), 2)
         print("I am in test case ", calcTester.testCaseNumber)
-        self.assertEqual(self.myCalc.getResult(),1)
+        # self.assertEqual(self.myCalc.getResult(),1)
 
     def test_DivideByZero(self):
         with self.assertRaises(cc.DivideByZeroError):

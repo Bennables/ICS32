@@ -50,5 +50,5 @@ if __name__ == '__main__':
     print(testCalc.getResult())
     testCalc.checkOpearation('*',5,4)
     print(testCalc.getResult())
-    testCalc.checkOpearation('',5,4)
+    testCalc.checkOpearation('/',5,4)
     print(testCalc.getResult())

@@ -19,7 +19,7 @@ class Calculator():
         self.setResult(num1-num2)
         
     def multNumbers(self,num1,num2):
-        self.setResult(num1num2)
+        self.setResult(num1*num2)
 
     def divNumbers(self,num1,num2):
         if num2 ==0:
