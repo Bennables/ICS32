@@ -43,7 +43,7 @@ def receive(game: BoardClass, sockets:socket):
     '''
 
     opp_move= int(sockets.recv(1024).decode())
-    game.updateGameBoard(opp_move, 'x')
+    game.board[opp_move] = 'x'
     game.printBoard()
 
 def getmove(game: BoardClass, sockets:socket):
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     otheruser= sockets.recv(1024).decode()
 
     sockets.send('player2'.encode())
-    game = BoardClass('player2', otheruser)
+    game = BoardClass('player2', otheruser, 'x')
     run(game, otheruser, sockets)
     while play_again(game, sockets):
         run(game, otheruser, sockets)

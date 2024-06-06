@@ -2,7 +2,7 @@ import socket
 from gameboard import BoardClass
 import time
 import signal
-import board
+
 
 
 
@@ -104,7 +104,7 @@ def sendUser(sockets:socket):
     #creates board with p1
     
 
-def getMove(game: BoardClass, sockets:socket, gui:board):
+def getMove(game: BoardClass, sockets:socket):
     '''gets move and prints updated board
     
         arg: game:boardclass, sockets:socket
@@ -151,7 +151,7 @@ def receive(game: BoardClass, sockets:socket):
     game.printBoard()
 
 
-def run(game: BoardClass, user:str, sockets:socket, gui: board):
+def run(game: BoardClass, user:str, sockets:socket):
     ''' gets user move, checks for end game, recieves p2 move, checks for end game
 
         args: game:boardclass, user:str, sockets:socket
@@ -166,7 +166,7 @@ def run(game: BoardClass, user:str, sockets:socket, gui: board):
     game.updateGamesPlayed()
 #nobody has won yet and board isn't full
     while not game.isWinner() or not game.boardIsFull():
-        getMove(game, sockets, gui)
+        getMove(game, sockets)
         game.setLastUser(user)
         if game.isWinner():
             print("x WINS")
@@ -218,12 +218,11 @@ def play_again(game, sockets):
         return True
     
 if __name__ == '__main__':
-    gui = board('x')
     sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sockets = connect()
     user, p2_user = sendUser(sockets)
-    game = BoardClass(user,p2_user)
-    run(game,user, sockets, gui)
+    game = BoardClass(user,p2_user, player = 'x')
+    run(game,user, sockets)
     while play_again(game, sockets):
         run(game,user, sockets)
     game.printStats()
