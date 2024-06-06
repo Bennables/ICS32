@@ -1,7 +1,0 @@
-what happens in p1 when game ran
-
-loops while there isn't a isWinner
-getmove()
-checkwinner
-receive move
-checkwinne

@@ -59,8 +59,10 @@ def getmove(game: BoardClass, sockets:socket):
         returns nothing
         
         '''
+
     game.creategrid()
-    
+    while not game.gone:
+        print("Waiting")
     game.disableGrid()
 
     

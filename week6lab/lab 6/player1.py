@@ -122,6 +122,8 @@ def getMove(game: BoardClass, sockets:socket):
     #456
     #789
     game.creategrid()
+    while not game.gone:
+        print("Waiting for a move")
     game.disableGrid()
     
 
