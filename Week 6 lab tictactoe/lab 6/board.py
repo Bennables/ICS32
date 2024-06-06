@@ -11,17 +11,13 @@ class Board():
     turn = 'x'
     #class variable in class scope
     buttons = [0,0,0,0,0,0,0,0,0]
-    X = 0
-    O = 0
     player = 0
-
+    gone = False
     def __init__(self, player = 'x') -> None:
         #redefine it
         #initiate class vars
         self.player = 'x'
         self.canvasSetup()
-        self.X = tk.Button(self.master, text = 'X',command = None)
-        self.O = tk.Button(self.master, text = 'O',command = None)
         #init tkinter
         self.creategrid()
         
@@ -54,8 +50,10 @@ class Board():
         self.master.rowconfigure(2, weight = 1)
     
     def creategrid(self):                                   #make sure no parents for command so it waits
+        self.gone = False;
         for i in range(9):
             self.buttons[i] = tk.Button(self.master, text = '',command = lambda x=i:self.submit(x))
+            
             self.buttons[i].grid(row = i//3, column = i%3,sticky='nsew')
 
         self.configGrid()
@@ -75,9 +73,9 @@ class Board():
         #loop thru it and change things, change to text box x and o
         for i in range(9):
             if self.board[i] == 'x':
-                self.X.grid(row = i//3, column= i%3, sticky = 'nsew')
+                self.buttons[i].config(text='X')
             elif self.board[i] == 'o':
-                self.O.grid(row = i//3, column= i%3, sticky = 'nsew')
+                self.buttons[i].config(text='O')
 
     #def method to start ui
     def startUI(self):
@@ -89,12 +87,16 @@ class Board():
             self.turn = 'x'
 
     def submit(self,ind):
+        self.gone = False
         if self.turn == self.player:
             if self.board[ind] == 0:
                 self.board[ind] = self.player
+                self.gone = True
                 
         self.updatePos()
         self.switchUser()
+    
+    def
     
     def getboard(self, ):
         return self.board
