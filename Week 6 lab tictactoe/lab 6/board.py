@@ -1,8 +1,7 @@
 import tkinter as tk
 # import tkk names from tkinger
 from tkinter import ttk
-import gameboard
-
+import gameboard as gb
 
 
 #create class for user interface
@@ -14,10 +13,10 @@ class Board():
     buttons = [0,0,0,0,0,0,0,0,0]
     player = 0
     gone = False
-    def __init__(self, player = 'x', gamebo = gameboard) -> None:
+    def __init__(self, player = 'x') -> None:
         #redefine it
         #initiate class vars
-        self.player = 'x'
+
         self.canvasSetup()
         #init tkinter
         self.creategrid()
@@ -51,7 +50,7 @@ class Board():
         self.master.rowconfigure(2, weight = 1)
     
     def creategrid(self):                                   #make sure no parents for command so it waits
-        self.gone = False;
+        self.gone = False
         for i in range(9):
             self.buttons[i] = tk.Button(self.master, text = '',command = lambda x=i:self.submit(x))
             
@@ -95,9 +94,7 @@ class Board():
                 self.gone = True
         self.updatePos()
         self.switchUser()
-    
-    def getboard(self, ):
-        return self.board
+        return ind + 1
     
 
 

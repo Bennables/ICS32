@@ -150,7 +150,7 @@ class BoardClass:
         return self.board
     
     def setboard(self, pos, item):
-        self.board[pos] = ite
+        self.board[pos] = item
 
     def printBoard(self):
         '''prints the board'''
