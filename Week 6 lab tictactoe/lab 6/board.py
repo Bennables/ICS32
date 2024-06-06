@@ -1,6 +1,7 @@
 import tkinter as tk
 # import tkk names from tkinger
 from tkinter import ttk
+import gameboard
 
 
 
@@ -13,7 +14,7 @@ class Board():
     buttons = [0,0,0,0,0,0,0,0,0]
     player = 0
     gone = False
-    def __init__(self, player = 'x') -> None:
+    def __init__(self, player = 'x', gamebo = gameboard) -> None:
         #redefine it
         #initiate class vars
         self.player = 'x'
@@ -92,11 +93,8 @@ class Board():
             if self.board[ind] == 0:
                 self.board[ind] = self.player
                 self.gone = True
-                
         self.updatePos()
         self.switchUser()
-    
-    def
     
     def getboard(self, ):
         return self.board

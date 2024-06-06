@@ -146,6 +146,12 @@ class BoardClass:
             return False
                 
 
+    def getboard(self):
+        return self.board
+    
+    def setboard(self, pos, item):
+        self.board[pos] = ite
+
     def printBoard(self):
         '''prints the board'''
         for i in range(3):
