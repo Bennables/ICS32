@@ -17,7 +17,8 @@ class BoardClass:
         count of games played
     '''
     game_count = 0
-
+    oldboard = []
+    move = 0
 
     def __init__(self,  username: str = "", lastUser: str= "", wins: int = 0, ties: int = 0, losses: int = 0, player:str = 'x') -> None:
         '''Making a gameboard.
@@ -188,7 +189,7 @@ class BoardClass:
 
     def canvasSetup(self):
         self.master = tk.Tk()
-        self.master.title("tictactoe")
+        self.master.title(self.player)
         self.master.geometry('600x600')
         self.master.configure(background = 'grey')
         self.master.resizable(0,0)
@@ -202,6 +203,7 @@ class BoardClass:
         self.master.rowconfigure(2, weight = 1)
     
     def creategrid(self):                                   #make sure no parents for command so it waits
+        self.oldboard = self.board
         self.gone = False
         for i in range(9):
             self.buttons[i] = tk.Button(self.master, text = '',command = lambda x=i:self.submit(x))
@@ -245,6 +247,13 @@ class BoardClass:
                 self.gone = True
                 self.switchUser()
                 self.updatePos()
+                for i in range(9):
+                    if self.board[i] != self.oldboard[i]:
+                        self.move = i
+    
+    def getMove(self):
+        return self.move
+
     def checkTurn(self):
         time.sleep(.25)
         return self.gone

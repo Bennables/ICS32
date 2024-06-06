@@ -43,8 +43,8 @@ def receive(game: BoardClass, sockets:socket):
     '''
 
     opp_move= int(sockets.recv(1024).decode())
-    game.board[opp_move] = 'x'
-    game.printBoard()
+    game.updateGameBoard(opp_move, 'x')
+    game.updatePos()
 
 def getmove(game: BoardClass, sockets:socket):
     '''gets move and prints updated board
@@ -63,6 +63,8 @@ def getmove(game: BoardClass, sockets:socket):
     game.creategrid()
     while not game.gone:
         print("Waiting")
+    game.updatePos()
+    sockets.send(str(game.getMove()).encode())
     game.disableGrid()
 
     
@@ -144,7 +146,7 @@ if __name__ == "__main__":
     otheruser= sockets.recv(1024).decode()
 
     sockets.send('player2'.encode())
-    game = BoardClass('player2', otheruser, 'x')
+    game = BoardClass('player2', otheruser, player = 'o')
     run(game, otheruser, sockets)
     while play_again(game, sockets):
         run(game, otheruser, sockets)

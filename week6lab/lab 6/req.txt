@@ -4,4 +4,4 @@ loops while there isn't a isWinner
 getmove()
 checkwinner
 receive move
-checkwinne
+checkwinner
