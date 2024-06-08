@@ -41,11 +41,6 @@ class BoardClass:
         self.turn = 'x'
         self.player = player
 
-        #TKINRER
-        self.canvasSetup()
-        self.creategrid()
-        self.updatePos()
-        self.startUI()
 
     def setUsername(self, username: str) -> None:
         '''Retrieving the user's name into the database.
@@ -167,7 +162,6 @@ class BoardClass:
                     print('_', end = ' ')
                 else:
                     print(self.board[i * 3 + j], end = ' ')
-            print()
 
     '''Checks if the board is full (I.e. no more moves to make - tie) and updates the ties count'''
     def boardIsFull(self) -> bool:
@@ -203,7 +197,6 @@ class BoardClass:
         self.master.rowconfigure(2, weight = 1)
     
     def creategrid(self):                                   #make sure no parents for command so it waits
-        self.oldboard = self.board
         self.gone = False
         for i in range(9):
             self.buttons[i] = tk.Button(self.master, text = '',command = lambda x=i:self.submit(x))
@@ -233,6 +226,7 @@ class BoardClass:
     #def method to start ui
     def startUI(self):
         self.master.mainloop()
+
     def switchUser(self):
         if self.turn == 'x':
             self.turn = 'o'
@@ -247,9 +241,9 @@ class BoardClass:
                 self.gone = True
                 self.switchUser()
                 self.updatePos()
-                for i in range(9):
-                    if self.board[i] != self.oldboard[i]:
-                        self.move = i
+                self.move = ind
+                print(self.move)
+                self.disableGrid()
     
     def getMove(self):
         return self.move
@@ -257,6 +251,9 @@ class BoardClass:
     def checkTurn(self):
         time.sleep(.25)
         return self.gone
+    
+    def breakgrid(self):
+        self.master.destroy()
 
     
 

@@ -2,6 +2,98 @@ import socket
 from gameboard import BoardClass
 import time
 import signal
+import tkinter as tk
+from tkinter import ttk
+
+def canvasSetup():
+    master = tk.Tk()
+    master.title('x')
+    master.geometry('600x600')
+    master.configure(background = 'grey')
+    master.resizable(0,0)
+    return master
+
+def configGrid(master:tk.Tk):
+    master.columnconfigure(0, weight = 1)
+    master.columnconfigure(1, weight = 1)
+    master.columnconfigure(2, weight = 1)
+    master.rowconfigure(0, weight = 1)
+    master.rowconfigure(1, weight = 1)
+    master.rowconfigure(2, weight = 1)
+
+def creategrid(master:tk.Tk, game, sockets):        #make sure no parents for command so it waits
+    global waiting
+    
+    if waiting:
+        for i in range(9):
+            buttons[i] = tk.Button(master, text = '', command = None)
+            buttons[i].grid(row = i//3, column = i%3,sticky='nsew')
+        configGrid(master)
+        updatePos(game.board)
+        time.sleep(2)
+        print("WAITING")
+        p2_move = int(sockets.recv(1024).decode())
+        print("REceived")
+        game.updateGameBoard(p2_move, 'o')
+        if game.isWinner():
+            print("o WINS")
+            game.addloss()
+        if game.boardIsFull():
+            print("NOBODY WINS")
+            game.addtie()
+        
+        waiting = False
+        creategrid(master, game, sockets)
+        print(waiting)
+    else:
+        for i in range(9):
+            buttons[i] = tk.Button(master, text = '',command = lambda x=i:submit(x, game, master, sockets))
+            buttons[i].grid(row = i//3, column = i%3,sticky='nsew')
+
+    configGrid(master)
+    updatePos(game.board)
+    
+
+def updatePos(board):
+    #loop thru it and change things, change to text box x and o
+    for i in range(9):
+        if board[i] == 'x':
+            buttons[i].config(text='X')
+        elif board[i] == 'o':
+            buttons[i].config(text='O')
+
+#def method to start ui
+def startUI(master:tk.Tk):
+    master.mainloop()
+
+def submit(ind, game:BoardClass, master, sockets):
+    if game.isValid(ind +1):
+        game.updateGameBoard(ind +1 , 'x')
+        updatePos(game.board)
+        creategrid(master, game, sockets)
+        time.sleep(2)
+        print(game.board)
+        global waiting
+        waiting = True
+        if game.isWinner():
+            print("x WINS")
+            game.addwin()
+        if game.boardIsFull():
+            print("NOBODY WINS")
+            game.addtie()
+        sockets.send(str(ind+1).encode())
+        print("DONE")
+        creategrid(master, game, sockets)
+        
+
+
+        
+
+        # print(game.board)
+        
+
+
+
 
 
 
@@ -67,10 +159,11 @@ def connect():
         try:
             
             sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            p2addy = input("p1 give p2 ip address")
-            p2host = int(input("p1 give port"))
+            # p2addy = input("p1 give p2 ip address")
+            # p2host = int(input("p1 give port"))
             with timeout(seconds=3):
-                sockets.connect((p2addy,p2host))
+                # sockets.connect((p2addy,p2host))
+                sockets.connect(('127.0.0.1',8016))
             try_connect = ''
         except Exception as e:
             print(e)
@@ -117,22 +210,20 @@ def getMove(game: BoardClass, sockets:socket):
         returns nothing
         excepts for bad moves and asks for a new move
         '''
-    
     #123
     #456
     #789
+    print("FELS")
     game.creategrid()
+    print("UAAYAYYA")
     while not game.gone:
         print("Waiting for a move")
-    game.updatePos()
     sockets.send(str(game.getMove()).encode())
-    game.disableGrid()
     
 
 
 def receive(game: BoardClass, sockets:socket):
-    '''recieves other player move, updates and prints board
-
+    '''recieves other player move, updates and prints board0
     params: game:boardclass, sockets:socket
 
     ex:
@@ -214,12 +305,18 @@ def play_again(game, sockets):
         return True
     
 if __name__ == '__main__':
+    global waiting
+    waiting = False
+    buttons = [0,0,0,0,0,0,0,0,0]
     sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sockets = connect()
     user, p2_user = sendUser(sockets)
+   
     game = BoardClass(user,p2_user, player = 'x')
-    run(game,user, sockets)
-    while play_again(game, sockets):
-        run(game,user, sockets)
+    gui = canvasSetup()
+    creategrid(gui,game,sockets)
+    startUI(gui)
     game.printStats()
     sockets.close()
+
+    
