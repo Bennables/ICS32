@@ -238,45 +238,6 @@ def receive(game: BoardClass, sockets:socket):
     game.updatePos()
 
 
-def run(game: BoardClass, user:str, sockets:socket):
-    ''' gets user move, checks for end game, recieves p2 move, checks for end game
-
-        args: game:boardclass, user:str, sockets:socket
-    
-        ex:
-        run()
-
-        no returns
-        no exceptions
-    '''
-    game.setLastUser(None)
-    game.updateGamesPlayed()
-#nobody has won yet and board isn't full
-    while not game.isWinner() or not game.boardIsFull():
-        getMove(game, sockets)
-        game.setLastUser(user)
-        if game.isWinner():
-            print("x WINS")
-            game.addwin()
-            break
-        if game.boardIsFull():
-            print("NOBODY WINS")
-            game.addtie()
-            break
-        receive(game, sockets)
-        game.setLastUser('player2')
-
-        if game.isWinner():
-            print("o WINS")
-            game.addloss()
-            break
-        if game.boardIsFull():
-            print("NOBODY WINS")
-            game.addtie()
-            break
-    
-
-
 def play_again(game, sockets):
     ''' asks if you wanna play again. 
 
