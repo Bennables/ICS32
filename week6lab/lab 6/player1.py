@@ -36,16 +36,31 @@ def creategrid(master:tk.Tk, game, sockets):        #make sure no parents for co
         print("REceived")
         game.updateGameBoard(p2_move, 'o')
         if game.isWinner():
-            master.destroy()
-            master = canvasSetup()
-            j = tk.Button(master, text = 'you lose').pack()
-            again = tk.Button(master,text = 'play again', command = lambda: resetGame(master, game, sockets)).pack()
-            end = tk.Button(master,text = 'play again', command = lambda: endgame(master,game)).pack()
-            startUI(master)
             game.addloss()
+            waiting = False
+            master.destroy()
+            master =canvasSetup()
+            d = tk.Text(master)
+            d.insert(tk.INSERT, 'O wins')
+            d.pack()
+            again = tk.Button(master,text = 'play again', command = lambda: resetGame(master, game, sockets)).pack()
+            end = tk.Button(master,text = 'end', command = lambda: endgame(master,game)).pack()
+            startUI(master)
+            
         if game.boardIsFull():
-            print("NOBODY WINS")
             game.addtie()
+            master.destroy()
+            waiting = False
+            master =canvasSetup()
+            d = tk.Text(master)
+            d.insert(tk.INSERT, 'TIE\nTIE\nTIE')
+            d.pack()
+            again = tk.Button(master,text = 'play again', command = lambda: resetGame(master, game, sockets)).pack()
+            end = tk.Button(master,text = 'end', command = lambda: endgame(master,game)).pack()
+            startUI(master)
+
+
+            
         
         waiting = False
         creategrid(master, game, sockets)
@@ -60,7 +75,10 @@ def creategrid(master:tk.Tk, game, sockets):        #make sure no parents for co
     
 def resetGame(master, game:BoardClass ,sockets):
     game.resetGameBoard()
+    master.destroy()
+    master = canvasSetup()
     creategrid(master,game,sockets)
+    
     
 
 def endgame(master, game : BoardClass):
@@ -93,11 +111,29 @@ def submit(ind, game:BoardClass, master, sockets):
         global waiting
         waiting = True
         if game.isWinner():
-            print("x WINS")
             game.addwin()
+            master.destroy()
+            master =canvasSetup()
+            d = tk.Text(master)
+            d.insert(tk.INSERT, 'X Wins')
+            d.pack()
+            waiting = False
+            again = tk.Button(master,text = 'play again', command = lambda: resetGame(master, game, sockets)).pack()
+            end = tk.Button(master,text = 'end', command = lambda: endgame(master,game)).pack()
+            startUI(master)
+            
         if game.boardIsFull():
-            print("NOBODY WINS")
             game.addtie()
+            master.destroy()
+            master =canvasSetup()
+            waiting = False
+            d = tk.Text(master)
+            d.insert(tk.INSERT, 'TIE')
+            d.pack()
+            again = tk.Button(master,text = 'play again', command = lambda: resetGame(master, game, sockets)).pack()
+            end = tk.Button(master,text = 'end', command = lambda: endgame(master,game)).pack()
+            startUI(master)
+            
         sockets.send(str(ind+1).encode())
         print("DONE")
         creategrid(master, game, sockets)
@@ -172,7 +208,7 @@ def connect(master, p2addy, p2host):
             sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             with timeout(seconds=3):
                 # sockets.connect((p2addy,int(p2host)))
-                sockets.connect(('127.0.0.1',8002))
+                sockets.connect(('127.0.0.1',9000))
             try_connect = ''
             userexchange(sockets)
         except Exception as e:
