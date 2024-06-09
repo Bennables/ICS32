@@ -214,7 +214,6 @@ def connect():
     # #def a port nnumber for server
     # port = int(input("port"))
     # return (serverAddress, port)
-    disableGrid(master,game,sockets)
     return ('127.0.0.1', 8016)
 
 
@@ -244,7 +243,7 @@ if __name__ == "__main__":
     sockets.send('player2'.encode())
     game = BoardClass('player2', otheruser, player = 'o')
     master = canvasSetup()
-    
+    disableGrid(master,game,sockets)
     startUI(master)
     run(game, otheruser, sockets)
     while play_again(game, sockets):

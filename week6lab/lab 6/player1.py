@@ -136,46 +136,60 @@ class timeout:
 
 #attempt connect to server
 
-def connect():
-    '''connects to the other
+def connectgui(master:tk.Tk):
+    #create the input boxes
 
-    no args
-    returns nothing
-    exception if socket fails to connect or type of input wrong
-        just tries again
-
-    ex:
-        connect()
-        [in termina] 
-        ip address (enter)
-        port (enter)
+    ipbox = tk.Entry (master, textvariable = '(ex. 127.0.0.1)')
+    portbox = tk.Entry(master, textvariable='ex 9000')
+    ipbox.pack()
+    portbox.pack()
+    submitbutton = tk.Button(master, text = 'submit', command = lambda: connect(master, ipbox.get(), portbox.get())).pack()
+    startUI(master)
     
-        
-        '''
+def connect(master, p2addy, p2host):
+    master.destroy()
     sockets = None
     try_connect= 'y'
     while try_connect == 'y':
-
         try:
-            
             sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            # p2addy = input("p1 give p2 ip address")
-            # p2host = int(input("p1 give port"))
             with timeout(seconds=3):
-                # sockets.connect((p2addy,p2host))
-                sockets.connect(('127.0.0.1',8016))
+                sockets.connect((p2addy,int(p2host)))
+                # sockets.connect(('127.0.0.1',8016))
             try_connect = ''
         except Exception as e:
             print(e)
-            try_connect = input('again? (y/n)').strip()
-            try_connect = try_connect.lower()
+            master1 = canvasSetup()
+            try_connec = tk.Entry(master1, textvariable= 'a')
+            try_connec.pack()
+            submit = tk.Button(master1, command = lambda: tryagain(master1, try_connec.get().lower().strip())).pack()
+            startUI(master1)
             sockets.close()
-            while not (try_connect == 'y' or try_connect =='n'):
-                try_connect = input('again? (y/n)').strip()
-                try_connect = try_connect.lower()
-            if try_connect == 'n':
-                exit(0)
+
     return sockets
+
+def tryagain(master, text):
+    master.destroy()
+    if text == 'y':
+        master = canvasSetup()
+        connectgui(master)
+
+    elif text == 'n':
+        exit(0)
+    else:
+        while text == 'y' or text != 'n':
+            master = canvasSetup()
+            try_connec = tk.Entry(master, textvariable= 'a')
+            try_connec.pack()
+            submit = tk.Button(master, command = lambda: tryagain(master, try_connec.get().lower().strip())).pack()
+            startUI(master)
+            if text == 'y':
+                master = canvasSetup()
+                connectgui(master)
+            elif text == 'n':
+                exit(0)
+
+
 
 
 def sendUser(sockets:socket):
@@ -270,13 +284,18 @@ if __name__ == '__main__':
     waiting = False
     buttons = [0,0,0,0,0,0,0,0,0]
     sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sockets = connect()
-    user, p2_user = sendUser(sockets)
+
    
-    game = BoardClass(user,p2_user, player = 'x')
+    
     gui = canvasSetup()
-    creategrid(gui,game,sockets)
+    
+    connectgui(gui)
+
     startUI(gui)
+    user, p2_user = sendUser(sockets)
+    game = BoardClass(user,p2_user, player = 'x')
+    #creategrid(gui,game,sockets)
+   
     game.printStats()
     sockets.close()
 
