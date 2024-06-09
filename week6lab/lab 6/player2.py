@@ -214,7 +214,7 @@ def connect():
     # #def a port nnumber for server
     # port = int(input("port"))
     # return (serverAddress, port)
-    return ('127.0.0.1', 8016)
+    return ('127.0.0.1', 8002)
 
 
 

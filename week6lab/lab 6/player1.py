@@ -36,10 +36,12 @@ def creategrid(master:tk.Tk, game, sockets):        #make sure no parents for co
         print("REceived")
         game.updateGameBoard(p2_move, 'o')
         if game.isWinner():
-            master.delete("all")
+            master.destroy()
+            master = canvasSetup()
             j = tk.Button(master, text = 'you lose').pack()
             again = tk.Button(master,text = 'play again', command = lambda: resetGame(master, game, sockets)).pack()
             end = tk.Button(master,text = 'play again', command = lambda: endgame(master,game)).pack()
+            startUI(master)
             game.addloss()
         if game.boardIsFull():
             print("NOBODY WINS")
@@ -58,12 +60,16 @@ def creategrid(master:tk.Tk, game, sockets):        #make sure no parents for co
     
 def resetGame(master, game:BoardClass ,sockets):
     game.resetGameBoard()
+    creategrid(master,game,sockets)
     
 
-def endgame(master, game):
+def endgame(master, game : BoardClass):
     '''dfjlsdjfkldsf
     p'''
-    pass
+    text = tk.Text(master)
+    text.insert(tk.INSERT, game.printStats())
+    text.pack()
+
 
 def updatePos(board):
     #loop thru it and change things, change to text box x and o
@@ -165,8 +171,8 @@ def connect(master, p2addy, p2host):
         try:
             sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             with timeout(seconds=3):
-                sockets.connect((p2addy,int(p2host)))
-                # sockets.connect(('127.0.0.1',8016))
+                # sockets.connect((p2addy,int(p2host)))
+                sockets.connect(('127.0.0.1',8002))
             try_connect = ''
             userexchange(sockets)
         except Exception as e:

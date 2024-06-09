@@ -172,13 +172,15 @@ class BoardClass:
 
 
     '''Prints usernames, last user to make a move, number of games, wins, losses, ties'''
-    def printStats(self) -> None:
-        print('USER: ' + self.username)
-        print('LastUser: ' + self.lastUser)
-        print('games played: '+ str(self.game_count))
-        print("wins: " + str(self.wins))
-        print('losses: ' + str(self.losses))
-        print('ties: '+ str(self.ties))
+    def printStats(self):
+        stri = ''
+        stri +='USER: ' + self.username
+        stri += '\nLastUser: ' + self.lastUser
+        stri +='\ngames played: '+ str(self.game_count)
+        stri += "\nwins: " + str(self.wins)
+        stri +='\nlosses: ' + str(self.losses)
+        stri += '\nties: '+ str(self.ties)
+        return stri
 
 
     def canvasSetup(self):
