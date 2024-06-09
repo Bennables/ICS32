@@ -29,9 +29,9 @@ def creategrid(master:tk.Tk, game, sockets):                             #make s
 
     configGrid(master)
     updatePos(master, game.board)
-    
-    
-    
+
+def getmo(sockets):
+    return int(sockets.recv(1024).decode())
 
 def disableGrid(master:tk.Tk, game:BoardClass, sockets):
     for i in range(9):
@@ -40,20 +40,79 @@ def disableGrid(master:tk.Tk, game:BoardClass, sockets):
 
     configGrid(master)
     updatePos(master, game.board)
+    master.update()
+    master.update_idletasks()
     print("Listening")
-    p2_move = int(sockets.recv(1024).decode())
+    p2_move = getmo(sockets)
+    
     print("received")
-    game.updateGameBoard(p2_move, 'x')
-    if game.isWinner():
+    print(p2_move)
+    if p2_move == 12:
         print("x WINS")
         game.addloss()
-    if game.boardIsFull():
+        game.resetGameBoard()
+        
+        for widget in master.winfo_children():
+            widget.destroy()
+        
+        d = tk.Text(master)
+        d.insert(tk.INSERT, 'X wins')
+        d.pack()
+        master.update_idletasks()
+        time.sleep(3)
+        d = int(sockets.recv(1024).decode())
+        if d == 1:
+            master.destroy()
+            master= canvasSetup()
+            disableGrid(master,game,sockets)
+            master.update()
+            master.update_idletasks()
+            startUI(master)
+            
+        else:
+            endgame(master,game)
+
+    elif p2_move == 13:
         game.addtie()
         print("NOBODY WINS")
-    print("updated")
-    creategrid(master, game, sockets)
-    print("BOAR DSHOUDL WORK")
+        game.resetGameBoard()
+        for widget in master.winfo_children():
+            widget.destroy()
+        
+        d = tk.Text(master)
+        d.insert(tk.INSERT, 'Tie')
+        d.pack()
+        master.update_idletasks()
+        time.sleep(3)
+        d = int(sockets.recv(1024).decode())
+        if d == 1:
+            master.destroy()
+            master= canvasSetup()
+            disableGrid(master,game,sockets)
+            master.update()
+            master.update_idletasks()
+            startUI(master)
+            
+        else:
+            endgame(master,game)
+
+
+    else:
+        game.updateGameBoard(p2_move, 'x')
+        print("updated")
+        creategrid(master, game, sockets)
+        print("BOAR DSHOUDL WORK")
     
+    
+def endgame(master, game : BoardClass):
+    '''dfjlsdjfkldsf
+    p'''
+    master.destroy()
+    master = canvasSetup()
+    text = tk.Text(master)
+    text.insert(tk.INSERT, game.printStats())
+    text.pack()    
+    startUI(master)
 
 
 def updatePos(master:tk.Tk, board):
@@ -74,11 +133,70 @@ def submit(ind, game:BoardClass, master, sockets):
         print("GOOD MOVE")
         game.updateGameBoard(ind +1 , 'o')
         print("DONE")
-        
-        # print(game.board)
         sockets.send(str(ind+1).encode())
-        print('sent"')
-        disableGrid(master, game, sockets)
+        if game.isWinner():
+
+            game.addtie()
+            print("o wins")
+            game.resetGameBoard()
+            for widget in master.winfo_children():
+                widget.destroy()
+            d = tk.Text(master)
+            d.insert(tk.INSERT, 'o wins')
+            d.pack()
+            master.update_idletasks()
+            d = int(sockets.recv(1024).decode())
+
+            time.sleep(3)
+            
+            if d == 1:
+                master.destroy()
+                master= canvasSetup()
+                disableGrid(master,game,sockets)
+                master.update()
+                master.update_idletasks()
+                startUI(master)
+            
+            else:
+                endgame(master,game)
+            
+        if game.boardIsFull():
+
+            game.addtie()
+            print("NOBODY WINS")
+            game.resetGameBoard()
+            for widget in master.winfo_children():
+                widget.destroy()
+        
+            d = tk.Text(master)
+            d.insert(tk.INSERT, 'Tie')
+            d.pack()
+            master.update_idletasks()
+            time.sleep(3)
+            d = int(sockets.recv(1024).decode())
+            if d == 1:
+                master.destroy()
+                master= canvasSetup()
+                disableGrid(master,game,sockets)
+                master.update()
+                master.update_idletasks()
+                startUI(master)
+                
+            else:
+                endgame(master,game)
+                # game.addtie()
+                # master.destroy()
+                # game.resetGameBoard()
+                # master =canvasSetup()
+                # d = tk.Text(master)
+                # d.insert(tk.INSERT, 'TIE')
+                # d.pack()
+                # startUI(master)
+            # print(game.board)
+        else:
+            
+            print('sent"')
+            disableGrid(master, game, sockets)
         
 
 def flush_input():
@@ -122,78 +240,7 @@ dis
     game.updateGameBoard(opp_move, 'x')
     game.printBoard()
 
-def getmove(game: BoardClass, sockets:socket):
-    '''gets move and prints updated board
     
-        args: game:boardclass, sockets:socket
-
-        ex:
-        getmove()
-        [in termina]
-        3
-        
-        returns nothing
-        
-        '''
-    flush_input()
-    try:
-        p2_move= int(input('your move 1-9\n'))
-    except:
-        p2_move = 10
-    #123
-    #456
-    #789
-    valid = game.isValid(p2_move)
-    while not valid:
-        try:
-            p2_move = int(input('your move 1-9\n'))
-            valid = game.isValid(p2_move)
-        except:
-            pass
-    if game.isWinner():
-        print("O WINS")
-        game.addwin()
-    if game.boardIsFull():
-        game.addtie()
-        print("NOBODY WINS")
-    sockets.send(str(p2_move).encode())
-    game.updateGameBoard(p2_move, 'o')
-    game.create
-    
-
-def run(game: BoardClass, otheruser:str, sockets:socket):
-    ''' gets user move, checks for end game, recieves p2 move, checks for end game
-
-        args: game:boardclass, otheruser: string, sockets:sockets
-    
-        ex:
-        run()
-        no returns
-    '''
-    game.updateGamesPlayed()
-    game.setLastUser(otheruser)
-    while not game.boardIsFull() or not game.isWinner():
-        receive(game, sockets)
-        game.setLastUser(otheruser)
-        if game.isWinner():
-            print("x WINS")
-            game.addloss()
-            break
-        if game.boardIsFull():
-            game.addtie()
-            print("NOBODY WINS")
-            break
-        getmove(game, sockets)
-        game.setLastUser('player2')
-        if game.isWinner():
-            print("O WINS")
-            game.addwin()
-            break
-        if game.boardIsFull():
-            game.addtie()
-            print("NOBODY WINS")
-            break
-        
 
 
 def connect():
@@ -214,39 +261,40 @@ def connect():
     # #def a port nnumber for server
     # port = int(input("port"))
     # return (serverAddress, port)
-    return ('127.0.0.1', 9000)
+    x = int(input('port'))
+    return ('127.0.0.1', x)
 
 
 
 if __name__ == "__main__":
+    try:
     #create a socket obj
-    not_connected = True
-    while not_connected:
-        try:
-            serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            #bind my host with my port number
-            serverSocket.bind(connect())
-            not_connected = False
-        except:
-            print('didnt work')
-    
-    buttons = [0,0,0,0,0,0,0,0,0]
+        not_connected = True
+        while not_connected:
+            try:
+                serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                #bind my host with my port number
+                serverSocket.bind(connect())
+                not_connected = False
+            except:
+                print('didnt work')
+        
+        buttons = [0,0,0,0,0,0,0,0,0]
 
-    #setup socket using listen
-    # 5 means max num connections socket allows
-    serverSocket.listen(0)
-    #begin accepting incoming connection requrests
-    sockets, clientAddress = serverSocket.accept()
-    #printing the client address
-    otheruser= sockets.recv(1024).decode()
+        #setup socket using listen
+        # 5 means max num connections socket allows
+        serverSocket.listen(0)
+        #begin accepting incoming connection requrests
+        sockets, clientAddress = serverSocket.accept()
+        #printing the client address
+        otheruser= sockets.recv(1024).decode()
 
-    sockets.send('player2'.encode())
-    game = BoardClass('player2', otheruser, player = 'o')
-    master = canvasSetup()
-    disableGrid(master,game,sockets)
-    startUI(master)
-    run(game, otheruser, sockets)
-    while play_again(game, sockets):
-        run(game, otheruser, sockets)
-    game.printStats()
-    serverSocket.close()
+        sockets.send('player2'.encode())
+        game = BoardClass('player2', otheruser, player = 'o')
+        master = canvasSetup()
+        disableGrid(master,game,sockets)
+        startUI(master)
+        game.printStats()
+        serverSocket.close()
+    except:
+        sockets.close()

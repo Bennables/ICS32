@@ -1,0 +1,7 @@
+p1 sends 12(win)
+p2 receives 12(runs logic)
+add loss
+reset board
+display that it lost
+wait for new signal
+terminate program

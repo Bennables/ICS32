@@ -44,7 +44,9 @@ def creategrid(master:tk.Tk, game, sockets):        #make sure no parents for co
             d.insert(tk.INSERT, 'O wins')
             d.pack()
             again = tk.Button(master,text = 'play again', command = lambda: resetGame(master, game, sockets)).pack()
-            end = tk.Button(master,text = 'end', command = lambda: endgame(master,game)).pack()
+            end = tk.Button(master,text = 'end', command = lambda: endgame(master,game, sockets)).pack()
+            master.update()
+            master.update_idletasks()
             startUI(master)
             
         if game.boardIsFull():
@@ -55,8 +57,10 @@ def creategrid(master:tk.Tk, game, sockets):        #make sure no parents for co
             d = tk.Text(master)
             d.insert(tk.INSERT, 'TIE\nTIE\nTIE')
             d.pack()
+            master.update()
+            master.update_idletasks()
             again = tk.Button(master,text = 'play again', command = lambda: resetGame(master, game, sockets)).pack()
-            end = tk.Button(master,text = 'end', command = lambda: endgame(master,game)).pack()
+            end = tk.Button(master,text = 'end', command = lambda: endgame(master,game, sockets)).pack()
             startUI(master)
 
 
@@ -78,15 +82,22 @@ def resetGame(master, game:BoardClass ,sockets):
     master.destroy()
     master = canvasSetup()
     creategrid(master,game,sockets)
+    sockets.send('1'.encode())
     
     
 
-def endgame(master, game : BoardClass):
+def endgame(master, game : BoardClass, sockets):
     '''dfjlsdjfkldsf
     p'''
+    master.destroy()
+    master= canvasSetup()
     text = tk.Text(master)
     text.insert(tk.INSERT, game.printStats())
     text.pack()
+    master.update()
+    master.update_idletasks()
+    sockets.send('10032'.encode())
+    startUI(master)
 
 
 def updatePos(board):
@@ -101,12 +112,13 @@ def updatePos(board):
 def startUI(master:tk.Tk):
     master.mainloop()
 
-def submit(ind, game:BoardClass, master, sockets):
+def submit(ind, game:BoardClass, master:tk.Tk, sockets):
     if game.isValid(ind +1):
         game.updateGameBoard(ind +1 , 'x')
         updatePos(game.board)
         creategrid(master, game, sockets)
-        time.sleep(2)
+        master.update()
+        master.update_idletasks()
         print(game.board)
         global waiting
         waiting = True
@@ -117,9 +129,10 @@ def submit(ind, game:BoardClass, master, sockets):
             d = tk.Text(master)
             d.insert(tk.INSERT, 'X Wins')
             d.pack()
+            sockets.send('12'.encode())
             waiting = False
             again = tk.Button(master,text = 'play again', command = lambda: resetGame(master, game, sockets)).pack()
-            end = tk.Button(master,text = 'end', command = lambda: endgame(master,game)).pack()
+            end = tk.Button(master,text = 'end', command = lambda: endgame(master,game, sockets)).pack()
             startUI(master)
             
         if game.boardIsFull():
@@ -127,6 +140,7 @@ def submit(ind, game:BoardClass, master, sockets):
             master.destroy()
             master =canvasSetup()
             waiting = False
+            sockets.send('13'.encode())
             d = tk.Text(master)
             d.insert(tk.INSERT, 'TIE')
             d.pack()
@@ -208,7 +222,7 @@ def connect(master, p2addy, p2host):
             sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             with timeout(seconds=3):
                 # sockets.connect((p2addy,int(p2host)))
-                sockets.connect(('127.0.0.1',9000))
+                sockets.connect(('127.0.0.1', int(p2host)))
             try_connect = ''
             userexchange(sockets)
         except Exception as e:
@@ -293,6 +307,7 @@ def getMove(game: BoardClass, sockets:socket):
     print("UAAYAYYA")
     while not game.gone:
         print("Waiting for a move")
+    
     sockets.send(str(game.getMove()).encode())
     
 
@@ -341,21 +356,24 @@ def play_again(game, sockets):
         return True
     
 if __name__ == '__main__':
-    global waiting
-    waiting = False
-    buttons = [0,0,0,0,0,0,0,0,0]
-    sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        global waiting
+        waiting = False
+        buttons = [0,0,0,0,0,0,0,0,0]
+        sockets = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-   
     
-    gui = canvasSetup()
-    
-    connectgui(gui)
+        
+        gui = canvasSetup()
+        
+        connectgui(gui)
 
-    startUI(gui)
-    #creategrid(gui,game,sockets)
-   
-    # game.printStats()
-    # sockets.close()
+        startUI(gui)
+        #creategrid(gui,game,sockets)
+    
+        # game.printStats()
+        # sockets.close()
+    except:
+        sockets.close()
 
     
