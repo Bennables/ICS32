@@ -36,7 +36,10 @@ def creategrid(master:tk.Tk, game, sockets):        #make sure no parents for co
         print("REceived")
         game.updateGameBoard(p2_move, 'o')
         if game.isWinner():
-            print("o WINS")
+            master.delete("all")
+            j = tk.Button(master, text = 'you lose').pack()
+            again = tk.Button(master,text = 'play again', command = lambda: resetGame(master, game, sockets)).pack()
+            end = tk.Button(master,text = 'play again', command = lambda: endgame(master,game)).pack()
             game.addloss()
         if game.boardIsFull():
             print("NOBODY WINS")
@@ -53,6 +56,14 @@ def creategrid(master:tk.Tk, game, sockets):        #make sure no parents for co
     configGrid(master)
     updatePos(game.board)
     
+def resetGame(master, game:BoardClass ,sockets):
+    game.resetGameBoard()
+    
+
+def endgame(master, game):
+    '''dfjlsdjfkldsf
+    p'''
+    pass
 
 def updatePos(board):
     #loop thru it and change things, change to text box x and o
@@ -157,6 +168,7 @@ def connect(master, p2addy, p2host):
                 sockets.connect((p2addy,int(p2host)))
                 # sockets.connect(('127.0.0.1',8016))
             try_connect = ''
+            userexchange(sockets)
         except Exception as e:
             print(e)
             master1 = canvasSetup()
@@ -189,10 +201,16 @@ def tryagain(master, text):
             elif text == 'n':
                 exit(0)
 
+def userexchange(sockets):
+    master = canvasSetup()
+    try_connec = tk.Entry(master, textvariable= 'a')
+    try_connec.pack()
+    submit = tk.Button(master, command = lambda: sendit(try_connec.get(), master, sockets)).pack()
 
 
 
-def sendUser(sockets:socket):
+def sendit(text, master, sockets):
+    master.destroy()
     '''asks for user and sends it to other person
         
         args: sockets
@@ -204,10 +222,11 @@ def sendUser(sockets:socket):
     no return
     no exceptions
     '''
-    user = input('Username')
-    sockets.send(user.encode())
+    sockets.send(text.encode())
     p2_user = sockets.recv(1024).decode()
-    return user, p2_user
+    game = BoardClass(text, p2_user, player = 'x')
+    master= canvasSetup()
+    creategrid(master, game, sockets)
     #creates board with p1
     
 
@@ -292,11 +311,9 @@ if __name__ == '__main__':
     connectgui(gui)
 
     startUI(gui)
-    user, p2_user = sendUser(sockets)
-    game = BoardClass(user,p2_user, player = 'x')
     #creategrid(gui,game,sockets)
    
-    game.printStats()
-    sockets.close()
+    # game.printStats()
+    # sockets.close()
 
     
